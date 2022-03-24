@@ -17,7 +17,7 @@ https://deverant-server.herokuapp.com/redoc
 
 https://deverant-server.herokuapp.com/docs
 
-# This api can:
+# What does this API can:
 Create new account, of course you can log in and log out.
 
 At first you can create new project and create new tasks in this project. In this version every project must have tasks. When you create task you can write worktime logs. 
