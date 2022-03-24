@@ -38,3 +38,5 @@ Add endpoint for update user's default currency.
 Create user's default currency param.
 
 Create automatic exchange for user's statistic endpoint.
+
+Create automatically delete old (more 30 days) tokens

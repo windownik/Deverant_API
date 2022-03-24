@@ -34,6 +34,7 @@ def custom_openapi():
                     "can't exchange money automatically.\n\n"
                     "",
         routes=app.routes,
+        tags=[{'name': 'Users', 'description': 'Work with users'}]
     )
     openapi_schema["info"]["x-logo"] = {
         "url": "https://i.postimg.cc/wvhDZTPn/Deverant.png"
@@ -63,7 +64,11 @@ def login_user(mail: str, password: str):
     This method return user auth token and secret. Didn't lose your secret\n
     How to prepare token to sand?\n
     Token = secret:auth_token.
+    ---
+    tags:
+    -Users
     """
+
     return login(mail=mail, password=password)
 
 
