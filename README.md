@@ -3,7 +3,7 @@
 
   # Our service is diary for your incomes
   # Welcome to Deverant API
-  # Version: 0.0.1 Alfa
+  # Version: 0.0.1.1 Alfa
 </div>
 
 # About Deverant
@@ -27,6 +27,10 @@ Worktime log is information when you started working on the task and finished. A
 Currency - Default USD. This param you can change after project creation. In this version service can't exchange money automatically.
 
 All functions of our service available for log in users.
+
+# Whats new in version 0.0.1.1 Alfa
+
+Rework automaticall documentation.
 
 # Fly to version 0.0.2 Alfa
 Create email confirm for new users. 

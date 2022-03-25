@@ -31,6 +31,11 @@ def create_table_all_users(cursor):
      salt TEXT,
      first_reg DATETIME,
      lust_activity DATETIME)''')
+    cursor.execute(f'''CREATE TABLE IF NOT EXISTS users_data (
+         id INTEGER PRIMARY KEY,
+         users_id INTEGER UNIQUE,
+         email_confirm_cod INTEGER,
+         email_confirm_dead_time DATETIME)''')
 
 
 @create_connect
@@ -174,6 +179,9 @@ def create_user_account(mail: str, hash_password: str, salt: str, nickname: str)
         if str(data) == '[]':
             return False
         else:
+            cursor.execute(f"INSERT OR IGNORE INTO all_users VALUES (?,?,?,?,?,?,?,?)",
+                           (None, mail, hash_password, nickname, "active", salt, data, data))
+            connect.commit()
             return True, data[0][0]
     except Exception as _ex:
         print("[INFORMATION] ERROR in db", _ex)
@@ -207,7 +215,7 @@ def user_create_project_task(user_id: int, project_id: int, name: str, descripti
     data = datetime.datetime.now()
     try:
         cursor.execute(f"INSERT OR IGNORE INTO project_task{user_id} VALUES (?,?,?,?,?,?,?,?)",
-                       (None, project_id, name, description, 0, 0, 'part', data, data))
+                       (None, project_id, name, description, '0', 0, data, data))
         connect.commit()
         cursor.execute(f'SELECT id FROM project_task{user_id} WHERE "create_data" = "{data}"')
         data = cursor.fetchall()[0][0]
