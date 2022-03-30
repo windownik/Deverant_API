@@ -1,3 +1,4 @@
+import secrets
 from functools import wraps
 import sqlite3
 import sha512_crypt
@@ -63,7 +64,9 @@ def get_id_by_auth(cursor, auth_token: str):
         secret_hash = data[0][2]
         status = sha512_crypt.verify(password=_secret, hashed_value=secret_hash)
         if status:
-            return data[0][1]
+            cursor.execute(f'SELECT * FROM all_users WHERE "id" = (?)', (data[0][1],))
+            user_data = cursor.fetchall()
+            return data[0][1], user_data[0][4]
         else:
             return '[]'
     else:
@@ -74,6 +77,14 @@ def get_id_by_auth(cursor, auth_token: str):
 def get_token_status(cursor, auth_token: str):
     """Get infor about token actuality"""
     cursor.execute(f'SELECT id FROM all_users WHERE "auth_token" = "{auth_token}"')
+    data = cursor.fetchall()
+    return data
+
+
+@create_connect
+def get_user_status(cursor, users_id: int):
+    """Get infor about token actuality"""
+    cursor.execute(f'SELECT email_confirm_cod FROM users_data WHERE "users_id" = (?)', (users_id,))
     data = cursor.fetchall()
     return data
 
@@ -169,23 +180,25 @@ def create_user_account(mail: str, hash_password: str, salt: str, nickname: str)
     """Create a new account by """
     connect = sqlite3.connect('modules/database.db', check_same_thread=False)
     cursor = connect.cursor()
-    data = datetime.datetime.now()
+    date = datetime.datetime.now()
     try:
         cursor.execute(f"INSERT OR IGNORE INTO all_users VALUES (?,?,?,?,?,?,?,?)",
-                       (None, mail, hash_password, nickname, "active", salt, data, data))
+                       (None, mail, hash_password, nickname, "need_email", salt, date, date))
         connect.commit()
-        cursor.execute(f'SELECT id FROM all_users WHERE "first_reg" = "{data}"')
+        cursor.execute(f'SELECT id FROM all_users WHERE "first_reg" = (?)', (date,))
         data = cursor.fetchall()
         if str(data) == '[]':
             return False
         else:
-            cursor.execute(f"INSERT OR IGNORE INTO all_users VALUES (?,?,?,?,?,?,?,?)",
-                           (None, mail, hash_password, nickname, "active", salt, data, data))
+            email_cod = str(secrets.token_hex(2))
+            print(email_cod)
+            cursor.execute(f"INSERT OR IGNORE INTO users_data VALUES (?,?,?,?)",
+                           (None, data[0][0], email_cod, date))
             connect.commit()
-            return True, data[0][0]
+            return True, data[0][0], email_cod
     except Exception as _ex:
         print("[INFORMATION] ERROR in db", _ex)
-        return False, False
+        return False, False, False
     finally:
         connect.close()
 
@@ -214,8 +227,8 @@ def user_create_project_task(user_id: int, project_id: int, name: str, descripti
     cursor = connect.cursor()
     data = datetime.datetime.now()
     try:
-        cursor.execute(f"INSERT OR IGNORE INTO project_task{user_id} VALUES (?,?,?,?,?,?,?,?)",
-                       (None, project_id, name, description, '0', 0, data, data))
+        cursor.execute(f"INSERT OR IGNORE INTO project_task{user_id} VALUES (?,?,?,?,?,?,?,?,?)",
+                       (None, project_id, name, description, 0, 0, 'part', data, data))
         connect.commit()
         cursor.execute(f'SELECT id FROM project_task{user_id} WHERE "create_data" = "{data}"')
         data = cursor.fetchall()[0][0]
@@ -396,6 +409,13 @@ def update_project_price(cursor, user_id: int, price: int, project_id: int):
     """Change price in project with id"""
     cursor.execute(f"UPDATE all_projects{user_id} SET money=(?) WHERE id=(?)",
                    (price, project_id))
+
+
+@create_connect
+def update_user_status(cursor, user_id: int, status: str = 'active'):
+    """Change price in project with id"""
+    cursor.execute(f"UPDATE all_users SET account_status=(?) WHERE id=(?)",
+                   (status, user_id))
 
 
 @create_connect

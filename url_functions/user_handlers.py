@@ -1,8 +1,8 @@
 
 from modules.little_funcs import create_token
-import sha512_crypt
-import secrets
+from modules.send_confirm_email import send_email
 from modules.sqLite import *
+import sha512_crypt
 
 
 def check_user_mail(mail: str):
@@ -47,6 +47,21 @@ def logout(user_auth: str,):
                 "date": datetime.datetime.now()}
 
 
+def confirm_email(user_auth: str, email_cod: str):
+    """Confirm email"""
+    user_id, status = get_id_by_auth(auth_token=user_auth)
+    confirm_cod_in_db = get_user_status(user_id)
+    if str(confirm_cod_in_db[0][0]).lower() == email_cod.lower():
+        update_user_status(user_id=user_id)
+        return {"status": True,
+                "description": "your email is confirm",
+                "date": datetime.datetime.now()}
+    else:
+        return {"status": False,
+                "description": "bad confirm cod",
+                "date": datetime.datetime.now()}
+
+
 def service_create_user_account(mail: str, password: str, nickname: str):
     """Create new user account if mail isn't coincidence with notes in database"""
     status = check_user_mail(mail=mail)
@@ -57,18 +72,26 @@ def service_create_user_account(mail: str, password: str, nickname: str):
     salt = secrets.token_urlsafe(10)
 
     password_hash = sha512_crypt.encrypt(f"{password}{salt}")
-    status, user_id = create_user_account(mail=mail, hash_password=password_hash, salt=salt, nickname=nickname)
+    status, user_id, email_cod = create_user_account(mail=mail, hash_password=password_hash, salt=salt,
+                                                     nickname=nickname)
     if status:
         # Create user's project table and user's log table
         create_table_user_projects(user_id=user_id)
         create_table_users_tasks(user_id=user_id)
         create_user_project_timework_table(user_id=user_id)
         create_table_user_log(user_id=user_id)
+        user_data = login(mail=mail, password=password)
+        auth_token = user_data['user_auth']
+        _secret = user_data['secret_key']
         # Write first log
         write_log(user_id=user_id, log_text=f'Create user account with mail: {mail}, '
                                             f'user_id:{user_id} and nickname: {nickname}')
+        send_email(user_email=mail, activated_cod=email_cod, auth_token=auth_token)
         return {"status": True,
                 "user mail": mail,
+                "user_auth": auth_token,
+                "secret_key": _secret,
+                "description": 'check your email',
                 "date": datetime.datetime.now()}
     else:
         return {"status": False,

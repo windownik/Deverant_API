@@ -10,9 +10,12 @@ def check_token(func):
     """Decorator check valid user token"""
     @wraps(func)
     def _con(user_auth: str, *args, **kwargs):
-        user_id = get_id_by_auth(auth_token=user_auth)
-
-        if str(user_id) == "[]" or user_auth == 'deleted':
+        user_id, user_status = get_id_by_auth(auth_token=user_auth)
+        if user_status == 'need_email':
+            return {"status": False,
+                    "description": "email not confirm",
+                    "date": datetime.datetime.now()}
+        elif str(user_id) == "[]" or user_auth == 'deleted':
             return {"status": False,
                     "description": "auth token not valid",
                     "date": datetime.datetime.now()}
@@ -28,9 +31,12 @@ def check_task_id(func):
     @wraps(func)
     def _con(user_auth: int, project_task_id: int, *args, **kwargs):
 
-        user_id = get_id_by_auth(auth_token=user_auth)
-
-        if str(user_id) == "[]" or user_auth == 'deleted':
+        user_id, user_status = get_id_by_auth(auth_token=user_auth)
+        if user_status == 'need_email':
+            return {"status": False,
+                    "description": "email not confirm",
+                    "date": datetime.datetime.now()}
+        elif str(user_id) == "[]" or user_auth == 'deleted':
             return {"status": False,
                     "description": "auth token not valid",
                     "date": datetime.datetime.now()}
@@ -54,8 +60,12 @@ def check_project_id(func):
     @wraps(func)
     def _con(user_auth: int, project_id: int, *args, **kwargs):
 
-        user_id = get_id_by_auth(auth_token=user_auth)
-        if str(user_id) == "[]" or user_auth == 'deleted':
+        user_id, user_status = get_id_by_auth(auth_token=user_auth)
+        if user_status == 'need_email':
+            return {"status": False,
+                    "description": "email not confirm",
+                    "date": datetime.datetime.now()}
+        elif str(user_id) == "[]" or user_auth == 'deleted':
             return {"status": False,
                     "description": "auth token not valid",
                     "date": datetime.datetime.now()}
@@ -78,8 +88,12 @@ def check_project_currency_id(func):
     @wraps(func)
     def _con(user_auth: int, currency: str, project_id: int, *args, **kwargs):
         currency = currency.upper()
-        user_id = get_id_by_auth(auth_token=user_auth)
-        if str(user_id) == "[]" or user_auth == 'deleted':
+        user_id, user_status = get_id_by_auth(auth_token=user_auth)
+        if user_status == 'need_email':
+            return {"status": False,
+                    "description": "email not confirm",
+                    "date": datetime.datetime.now()}
+        elif str(user_id) == "[]" or user_auth == 'deleted':
             return {"status": False,
                     "description": "auth token not valid",
                     "date": datetime.datetime.now()}
@@ -107,9 +121,12 @@ def check_worktime_log(func):
     @wraps(func)
     def _con(user_auth: int, session_log_id: int, *args, **kwargs):
 
-        user_id = get_id_by_auth(auth_token=user_auth)
-
-        if str(user_id) == "[]" or user_auth == 'deleted':
+        user_id, user_status = get_id_by_auth(auth_token=user_auth)
+        if user_status == 'need_email':
+            return {"status": False,
+                    "description": "email not confirm",
+                    "date": datetime.datetime.now()}
+        elif str(user_id) == "[]" or user_auth == 'deleted':
             return {"status": False,
                     "description": "auth token not valid",
                     "date": datetime.datetime.now()}

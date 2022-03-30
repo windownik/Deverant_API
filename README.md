@@ -3,7 +3,7 @@
 
   # Our service is diary for your incomes
   # Welcome to Deverant API
-  # Version: 0.0.1.1 Alfa
+  # Version: 0.0.1.2 Alfa
 </div>
 
 # About Deverant
@@ -28,9 +28,10 @@ Currency - Default USD. This param you can change after project creation. In thi
 
 All functions of our service available for log in users.
 
-# Whats new in version 0.0.1.1 Alfa
+# Whats new in version 0.0.1.2 Alfa
 
-Rework automaticall documentation.
+Create email confirm for new users. 
+End point for get database.
 
 # Fly to version 0.0.2 Alfa
 Create email confirm for new users. 
@@ -44,3 +45,7 @@ Create user's default currency param.
 Create automatic exchange for user's statistic endpoint.
 
 Create automatically delete old (more 30 days) tokens
+
+# Version 0.0.1.1 Alfa
+
+Rework automaticall documentation.

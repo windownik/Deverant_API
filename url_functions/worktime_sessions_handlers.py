@@ -25,7 +25,7 @@ def update_task_worktime(user_id: int, project_id: int, task_id: int):
         pass
     else:
         project_data = get_project_by_id(user_id=user_id, project_id=project_id)
-        money = int(project_data[0][5]/project_data[0][4] * task_worktime)
+        money = int(project_data[0][4]/project_data[0][3] * task_worktime)
         update_task_price(user_id=user_id, price=money, task_id=task_id, money_type='part')
 
 

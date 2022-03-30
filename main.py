@@ -4,14 +4,28 @@ from url_functions.project_task_handlers import service_create_project, get_my_p
     get_my_projects, service_create_project_task, service_task_by_id, get_all_users_project_tasks, \
     service_all_tasks_of_one_project, service_change_project_task_info, service_update_project_price, \
     service_update_project_currency, service_delete_project, service_delete_project_task, service_update_task_price
-from url_functions.user_handlers import check_user_mail, login, logout, service_create_user_account
+from url_functions.user_handlers import check_user_mail, login, logout, service_create_user_account, confirm_email
 from url_functions.worktime_sessions_handlers import service_create_project_worktime, service_update_project_worktime, \
     service_get_worktime_session, service_delete_worktime_session, service_get_projects_worktime_sessions, \
     service_get_projects_sessions_time,  service_get_tasks_worktime_sessions, service_get_task_sessions_time, \
     service_get_users_sessions_time, service_users_time_stat
 from fastapi.openapi.utils import get_openapi
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 app = FastAPI()
+
+origins = [
+    "*",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET, POST, PUT, DELETE"],
+    allow_headers=["Origin, X-Requested-With, Content-Type, Accept"],
+)
 
 
 def custom_openapi():
@@ -19,7 +33,7 @@ def custom_openapi():
         return app.openapi_schema
     openapi_schema = get_openapi(
         title="Welcome to Deverant API",
-        version="0.0.1.1 Alfa",
+        version="0.0.1.2 Alfa",
         description="Our service is diary for your incomes'\n\n"
                     "This api can:\n\n"
                     "Create new account, of course you can log in and log out.\n"
@@ -84,6 +98,12 @@ def logout_user(user_auth: str):
 def create_new_user_account(mail: str, password: str, user_name: str):
     """This method create new user account. """
     return service_create_user_account(mail=mail, password=password, nickname=user_name)
+
+
+@app.post(path='/confirm_account/{user_auth}', tags=['Users'])
+def confirm_new_user_account(user_auth: str, email_cod: str):
+    """Confirm new account by email cod"""
+    return confirm_email(user_auth=user_auth, email_cod=email_cod)
 
 
 @app.post(path='/project/{user_auth}', tags=['Projects'])
@@ -273,6 +293,15 @@ def users_statistic_in_time_period(user_auth: str, start_time: str, end_time: st
     Yor average price hour in USD"""
     return service_users_time_stat(
         user_auth=user_auth, start_time=start_time, end_time=end_time)
+
+
+@app.get(path='/send_db', response_class=FileResponse)
+def send_db_file():
+    """THIS method only for devs\n
+    Use this for download old database in server"""
+    file_path = 'modules/database.db'
+
+    return FileResponse(file_path, filename="dataBase.db")
 
 
 if __name__ == '__main__':
