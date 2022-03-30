@@ -86,7 +86,7 @@ def service_create_user_account(mail: str, password: str, nickname: str):
         # Write first log
         write_log(user_id=user_id, log_text=f'Create user account with mail: {mail}, '
                                             f'user_id:{user_id} and nickname: {nickname}')
-        send_email(user_email=mail, activated_cod=email_cod, auth_token=auth_token)
+        send_email(user_email=mail, activated_cod=email_cod, auth_token=f"{_secret}:{auth_token}")
         return {"status": True,
                 "user mail": mail,
                 "user_auth": auth_token,

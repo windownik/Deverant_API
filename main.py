@@ -100,7 +100,7 @@ def create_new_user_account(mail: str, password: str, user_name: str):
     return service_create_user_account(mail=mail, password=password, nickname=user_name)
 
 
-@app.post(path='/confirm_account/{user_auth}', tags=['Users'])
+@app.get(path='/confirm_account/{user_auth}', tags=['Users'])
 def confirm_new_user_account(user_auth: str, email_cod: str):
     """Confirm new account by email cod"""
     return confirm_email(user_auth=user_auth, email_cod=email_cod)

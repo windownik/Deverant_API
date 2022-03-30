@@ -191,7 +191,6 @@ def create_user_account(mail: str, hash_password: str, salt: str, nickname: str)
             return False
         else:
             email_cod = str(secrets.token_hex(2))
-            print(email_cod)
             cursor.execute(f"INSERT OR IGNORE INTO users_data VALUES (?,?,?,?)",
                            (None, data[0][0], email_cod, date))
             connect.commit()
