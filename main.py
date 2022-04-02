@@ -12,6 +12,7 @@ from url_functions.worktime_sessions_handlers import service_create_project_work
 from fastapi.openapi.utils import get_openapi
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.responses import HTMLResponse
 
 app = FastAPI()
 
@@ -64,10 +65,26 @@ def custom_openapi():
 app.openapi = custom_openapi
 
 
-@app.get('/')
+def generate_html_response():
+    html_content = """
+    <html>
+        <head>
+            <title>Start page</title>
+        </head>
+        <body>
+            <h2>Documentation for Deverant API</h2>
+            <p><a href="/docs">Documentation standart</a></p>
+            <p><a href="/redoc">Documentation from reDoc</a></p>
+        </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content, status_code=200)
+
+
+@app.get('/', response_class=HTMLResponse)
 def main_page():
     """main page"""
-    return f"Docs here /docs"
+    return generate_html_response()
 
 
 @app.get(path='/check/{mail}', tags=['Users'])

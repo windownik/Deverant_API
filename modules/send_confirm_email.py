@@ -5,6 +5,7 @@ import smtplib
 def send_email(user_email: str, activated_cod: str, auth_token: str):
     sender = "deverant.main@gmail.com"
     password = os.getenv('EMAIL_PASSWORD')
+    password = '170095Ap14'
 
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
