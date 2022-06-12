@@ -55,6 +55,8 @@ def create_table_tokens(cursor):
 @create_connect
 def get_id_by_auth(cursor, auth_token: str):
     """Get account id by auth token"""
+    if ':' not in auth_token:
+        return '[]', '[]'
     _secret = str(auth_token.split(':')[0])
     user_auth = str(auth_token.split(':')[1])
     cursor.execute(f'SELECT * FROM tokens WHERE "token" = (?) AND "status" = "active"', (user_auth,))
@@ -64,7 +66,7 @@ def get_id_by_auth(cursor, auth_token: str):
         user_data = cursor.fetchall()
         return data[0][1], user_data[0][4]
     else:
-        return '[]'
+        return '[]', '[]'
 
 
 @create_connect
