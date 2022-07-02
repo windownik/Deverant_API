@@ -270,11 +270,14 @@ def service_users_time_stat(user_id: int, start_time: str, end_time: str, time_d
         all_time_money += money
         # Get project currency
         projects_currency_in_period[project] = project_data[0][5]
-
+    if all_time == 0:
+        price_hour = 0
+    else:
+        price_hour = int((all_time_money*3600)/all_time)
     return_data = {"all_work_time": all_time,
                    "all_money_in_time_period": all_time_money,
                    "currency": "RUR",
-                   "price_hour": int((all_time_money*3600)/all_time),
+                   "price_hour": price_hour,
                    "all_projects_ids": projects}
 
     for project in projects:

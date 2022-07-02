@@ -42,6 +42,7 @@ def service_create_project_task(user_id: int, project_id: int, name: str, descri
     At first: check user's auth token status\n
     Next: create line in table user's projects and table for timework sessions
     """
+    print(name, description)
     project_task_id = user_create_project_task(user_id=user_id, project_id=project_id, name=name,
                                                description=description)
     # Write log

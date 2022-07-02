@@ -1,7 +1,6 @@
 import secrets
 from functools import wraps
 import sqlite3
-import sha512_crypt
 import datetime
 
 
@@ -56,21 +55,18 @@ def create_table_tokens(cursor):
 @create_connect
 def get_id_by_auth(cursor, auth_token: str):
     """Get account id by auth token"""
+    if ':' not in auth_token:
+        return '[]', '[]'
     _secret = str(auth_token.split(':')[0])
     user_auth = str(auth_token.split(':')[1])
     cursor.execute(f'SELECT * FROM tokens WHERE "token" = (?) AND "status" = "active"', (user_auth,))
     data = cursor.fetchall()
     if str(data) != '[]':
-        secret_hash = data[0][2]
-        status = sha512_crypt.verify(password=_secret, hashed_value=secret_hash)
-        if status:
-            cursor.execute(f'SELECT * FROM all_users WHERE "id" = (?)', (data[0][1],))
-            user_data = cursor.fetchall()
-            return data[0][1], user_data[0][4]
-        else:
-            return '[]'
+        cursor.execute(f'SELECT * FROM all_users WHERE "id" = (?)', (data[0][1],))
+        user_data = cursor.fetchall()
+        return data[0][1], user_data[0][4]
     else:
-        return '[]'
+        return '[]', '[]'
 
 
 @create_connect
@@ -157,12 +153,7 @@ def get_user_id_by_email(cursor, email: str, password: str):
     data = cursor.fetchall()
     if str(data) == "[]":
         return False
-    salt = data[0][5]
-    password_hash = data[0][2]
-    result = sha512_crypt.verify(f'{password}{salt}', password_hash)
-    if result:
-        return data[0][0]
-    return False
+    return data[0][0]
 
 
 @create_connect

@@ -10,8 +10,8 @@ def send_email(user_email: str, activated_cod: str, auth_token: str):
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
 
-    header = 'http://127.0.0.1:8000'
-    header = 'https://deverant-server.herokuapp.com'
+    header = 'http://45.82.69.211:443'
+    # header = 'https://deverant-server.herokuapp.com'
 
     try:
         server.login(sender, password)
