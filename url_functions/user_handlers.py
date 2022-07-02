@@ -91,7 +91,7 @@ def service_create_user_account(mail: str, password: str, nickname: str):
         except Exception as _ex:
             pass
         return {"status": True,
-                "user mail": mail,
+                "user_mail": mail,
                 "user_auth": auth_token,
                 "secret_key": _secret,
                 "description": 'check your email',
