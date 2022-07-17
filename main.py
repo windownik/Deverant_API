@@ -4,7 +4,8 @@ from url_functions.project_task_handlers import service_create_project, get_my_p
     get_my_projects, service_create_project_task, service_task_by_id, get_all_users_project_tasks, \
     service_all_tasks_of_one_project, service_change_project_task_info, service_update_project_price, \
     service_update_project_currency, service_delete_project, service_delete_project_task, service_update_task_price
-from url_functions.user_handlers import check_user_mail, login, logout, service_create_user_account, confirm_email
+from url_functions.user_handlers import check_user_mail, login, logout, service_create_user_account, confirm_email, \
+    check_user_auth_token
 from url_functions.worktime_sessions_handlers import service_create_project_worktime, service_update_project_worktime, \
     service_get_worktime_session, service_delete_worktime_session, service_get_projects_worktime_sessions, \
     service_get_projects_sessions_time,  service_get_tasks_worktime_sessions, service_get_task_sessions_time, \
@@ -93,6 +94,12 @@ def check_new_mail(mail: str):
     return check_user_mail(mail=mail)
 
 
+@app.get(path='/getMe/{user_auth}', tags=['Users'])
+def check_new_mail(user_auth: str):
+    """This method return user's mail status."""
+    return check_user_auth_token(user_auth=user_auth)
+
+
 @app.get(path='/login/{mail}', tags=['Users'])
 def login_user(mail: str, password: str):
     """
@@ -117,10 +124,10 @@ def create_new_user_account(mail: str, password: str, user_name: str):
     return service_create_user_account(mail=mail, password=password, nickname=user_name)
 
 
-@app.get(path='/confirm_account/{user_auth}', tags=['Users'])
-def confirm_new_user_account(user_auth: str, email_cod: str):
-    """Confirm new account by email cod"""
-    return confirm_email(user_auth=user_auth, email_cod=email_cod)
+# @app.get(path='/confirm_account/{user_auth}', tags=['Users'])
+# def confirm_new_user_account(user_auth: str, email_cod: str):
+#     """Confirm new account by email cod"""
+#     return confirm_email(user_auth=user_auth, email_cod=email_cod)
 
 
 @app.post(path='/project/{user_auth}', tags=['Projects'])
@@ -323,6 +330,6 @@ def send_db_file():
 
 if __name__ == '__main__':
     uvicorn.run("main:app",
-                host="127.0.0.1",
-                port=5000,
+                host="45.82.69.211",
+                port=443,
                 reload=True)

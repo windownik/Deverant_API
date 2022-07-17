@@ -78,6 +78,14 @@ def get_token_status(cursor, auth_token: str):
 
 
 @create_connect
+def get_user_by_token(cursor, user_id: int):
+    """Get infor about token actuality"""
+    cursor.execute(f'SELECT mail, nickname FROM all_users WHERE "id" = {user_id}')
+    data = cursor.fetchall()
+    return data
+
+
+@create_connect
 def get_user_status(cursor, users_id: int):
     """Get infor about token actuality"""
     cursor.execute(f'SELECT email_confirm_cod FROM users_data WHERE "users_id" = (?)', (users_id,))

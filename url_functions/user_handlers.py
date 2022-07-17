@@ -14,6 +14,24 @@ def check_user_mail(mail: str):
         return {"mail in database": True}
 
 
+def check_user_auth_token(user_auth: str):
+    """Check user mail on coincidence in database"""
+    user_id = get_id_by_auth(auth_token=user_auth)
+    if str(user_id) == "[]":
+        return {"status": False,
+                "description": 'Bad auth token',
+                "date": datetime.datetime.now()}
+    else:
+        user_data = get_user_by_token(user_id[0])
+        print(user_data[0])
+        mail = user_data[0][0]
+        nickname = user_data[0][1]
+        return {"status": True,
+                "email": mail,
+                "nickname": nickname,
+                "date": datetime.datetime.now()}
+
+
 def login(mail: str, password: str):
     """Create new auth token, save it in database and return to user"""
     user_id = get_user_id_by_email(email=mail, password=password)
@@ -80,6 +98,7 @@ def service_create_user_account(mail: str, password: str, nickname: str):
         create_table_users_tasks(user_id=user_id)
         create_user_project_timework_table(user_id=user_id)
         create_table_user_log(user_id=user_id)
+        update_user_status(user_id=user_id)
         user_data = login(mail=mail, password=password)
         auth_token = user_data['user_auth']
         _secret = user_data['secret_key']
