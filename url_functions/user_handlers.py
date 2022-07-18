@@ -23,7 +23,6 @@ def check_user_auth_token(user_auth: str):
                 "date": datetime.datetime.now()}
     else:
         user_data = get_user_by_token(user_id[0])
-        print(user_data[0])
         mail = user_data[0][0]
         nickname = user_data[0][1]
         return {"status": True,
