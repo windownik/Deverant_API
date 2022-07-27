@@ -13,9 +13,9 @@ Our API running on Heroku
 
 Documentation:
 
-https://deverant-server.herokuapp.com/redoc
+http://45.82.69.211:443/redoc
 
-https://deverant-server.herokuapp.com/docs
+http://45.82.69.211:443/docs
 
 # What does this API can:
 Create new account, of course you can log in and log out.
