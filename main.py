@@ -100,14 +100,14 @@ def check_new_mail(user_auth: str):
     return check_user_auth_token(user_auth=user_auth)
 
 
-@app.get(path='/login/{mail}', tags=['Users'])
-def login_user(mail: str, password: str):
+@app.get(path='/login/{email}', tags=['Users'])
+def login_user(email: str, password: str):
     """
     This method return user auth token and secret. Didn't lose your secret\n
     How to prepare token to sand?\n
     Token = secret:auth_token.
     """
-    return login(mail=mail, password=password)
+    return login(mail=email, password=password)
 
 
 @app.put(path='/logout/{user_auth}', tags=['Users'])
