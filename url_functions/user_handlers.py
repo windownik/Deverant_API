@@ -1,6 +1,7 @@
-
 from modules.little_funcs import create_token
 from modules.send_confirm_email import send_email
+from starlette.responses import Response
+from starlette import status
 from modules.sqLite import *
 import sha512_crypt
 
@@ -18,9 +19,8 @@ def check_user_auth_token(user_auth: str):
     """Check user mail on coincidence in database"""
     user_id = get_id_by_auth(auth_token=user_auth)
     if str(user_id) == "[]":
-        return {"status": False,
-                "description": 'Bad auth token',
-                "date": datetime.datetime.now()}
+        return Response(content='Bad auth token',
+                        status_code=status.HTTP_403_FORBIDDEN)
     else:
         user_data = get_user_by_token(user_id[0])
         mail = user_data[0][0]
@@ -36,27 +36,24 @@ def login(mail: str, password: str):
     user_id = get_user_id_by_email(email=mail, password=password)
     if user_id:
         auth_token, _secret = create_token()
-        secret_hash = sha512_crypt.encrypt(_secret)
         data = datetime.datetime.now() + datetime.timedelta(days=30)
-        create_auth_token(user_id=user_id, auth_token=auth_token, secret_hash=secret_hash, status='active',
+        create_auth_token(user_id=user_id, auth_token=auth_token, secret_hash=password, status='active',
                           dead_time=data, creat_time=datetime.datetime.now())
         return {"status": True,
                 "user_auth": auth_token,
                 "secret_key": _secret,
                 "date": datetime.datetime.now()}
     else:
-        return {"status": False,
-                "description": 'email or password Error',
-                "date": datetime.datetime.now()}
+        return Response(content='email or password Error',
+                        status_code=status.HTTP_403_FORBIDDEN)
 
 
-def logout(user_auth: str,):
+def logout(user_auth: str, ):
     """This method delete user's auth token"""
     user_id = get_id_by_auth(auth_token=user_auth)
     if str(user_id) == '[]':
-        return {"status": False,
-                "description": "auth_token not valid",
-                "date": datetime.datetime.now()}
+        return Response(content='auth_token not valid',
+                        status_code=status.HTTP_403_FORBIDDEN)
     else:
         delete_auth_token(user_auth=user_auth)
         return {"status": True,
@@ -74,24 +71,22 @@ def confirm_email(user_auth: str, email_cod: str):
                 "description": "your email is confirm",
                 "date": datetime.datetime.now()}
     else:
-        return {"status": False,
-                "description": "bad confirm cod",
-                "date": datetime.datetime.now()}
+        return Response(content='bad confirm cod',
+                        status_code=status.HTTP_403_FORBIDDEN)
 
 
 def service_create_user_account(mail: str, password: str, nickname: str):
     """Create new user account if mail isn't coincidence with notes in database"""
-    status = check_user_mail(mail=mail)
-    if status["mail in database"]:
-        return {"status": False,
-                "description": 'i have same email in database'}
+    _status = check_user_mail(mail=mail)
+    if _status["mail in database"]:
+        return Response(content='i have same email in database',
+                        status_code=status.HTTP_403_FORBIDDEN)
 
     salt = secrets.token_urlsafe(10)
 
-    password_hash = sha512_crypt.encrypt(f"{password}{salt}")
-    status, user_id, email_cod = create_user_account(mail=mail, hash_password=password_hash, salt=salt,
-                                                     nickname=nickname)
-    if status:
+    _status, user_id, email_cod = create_user_account(mail=mail, hash_password=password, salt=salt,
+                                                      nickname=nickname)
+    if _status:
         # Create user's project table and user's log table
         create_table_user_projects(user_id=user_id)
         create_table_users_tasks(user_id=user_id)
@@ -115,6 +110,5 @@ def service_create_user_account(mail: str, password: str, nickname: str):
                 "description": 'check your email',
                 "date": datetime.datetime.now()}
     else:
-        return {"status": False,
-                "description": "Error in database. Can't create new account",
-                "date": datetime.datetime.now()}
+        return Response(content="Error in database. Can't create new account",
+                        status_code=status.HTTP_403_FORBIDDEN)

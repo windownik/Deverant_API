@@ -1,3 +1,6 @@
+from starlette.responses import Response
+import starlette.status as _status
+
 from modules.sqLite import *
 from modules.decorators import check_token, check_task_id, check_project_currency_id, check_project_id
 import datetime
@@ -7,9 +10,8 @@ def get_user_auth_status(user_auth: str):
     """This method returns user_auth actuality status"""
     auth = get_token_status(auth_token=user_auth)
     if auth is None:
-        return {"status": False,
-                "user_auth": auth,
-                "date": datetime.datetime.now()}
+        return Response(content='Bad auth token',
+                        status_code=_status.HTTP_403_FORBIDDEN)
     else:
         return {"status": True,
                 "user_auth": user_auth,
@@ -59,21 +61,27 @@ def service_create_project_task(user_id: int, project_id: int, name: str, descri
 
 
 @check_token
-def get_my_projects(user_id: int):
+def get_my_projects(user_id: int, offset: int = 0, limit: int = 0):
     """Find all user's projects and get ids"""
-    my_projects = grab_all_my_projects(user_id=user_id)
-    all_projects = {}
+    if limit != 0:
+        my_projects = grab_my_projects_offset(user_id=user_id, offset=offset, limit=limit)
+    else:
+        my_projects = grab_all_my_projects(user_id=user_id)
+    all_projects = []
+    projects_list = []
     for element in my_projects:
-        all_projects[element[0]] = {"status": True,
-                                    'id': element[0],
-                                    "project_name": element[1],
-                                    "description": element[2],
-                                    "work_time": element[3],
-                                    "money": element[4],
-                                    "currency": element[5],
-                                    "create_data": element[6],
-                                    "lust_activity": element[7]}
-    if all_projects == {}:
+        project = {"status": True,
+                   'id': element[0],
+                   "project_name": element[1],
+                   "description": element[2],
+                   "work_time": element[3],
+                   "money": element[4],
+                   "currency": element[5],
+                   "create_data": element[6],
+                   "lust_activity": element[7]}
+        all_projects.append(project)
+        projects_list.append(element[0])
+    if not all_projects:
         return {"status": True,
                 "auth_token_status": "active",
                 "description": "you haven't any projects"}

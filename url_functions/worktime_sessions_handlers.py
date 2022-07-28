@@ -1,5 +1,7 @@
+from starlette import status as _status
+from starlette.responses import Response
+
 from modules.decorators import check_token, check_task_id, check_time, check_worktime_log, check_project_id
-from modules.little_funcs import data_time_validation
 from modules.sqLite import *
 
 
@@ -25,7 +27,7 @@ def update_task_worktime(user_id: int, project_id: int, task_id: int):
         pass
     else:
         project_data = get_project_by_id(user_id=user_id, project_id=project_id)
-        money = int(project_data[0][4]/project_data[0][3] * task_worktime)
+        money = int(project_data[0][4] / project_data[0][3] * task_worktime)
         update_task_price(user_id=user_id, price=money, task_id=task_id, money_type='part')
 
 
@@ -39,8 +41,8 @@ def service_create_project_worktime(user_id: int, project_task_data: tuple, proj
     log_id = create_task_worktime_session(user_id=user_id, project_id=project_id, task_id=project_task_id,
                                           start=start_time, end=end_time, time_delta=time_delta)
     if not log_id:
-        return {"status": False,
-                "description": "Error in database"}
+        return Response(content=f"Error in database",
+                        status_code=_status.HTTP_403_FORBIDDEN)
 
     else:
         # Update worktime in tables
@@ -76,8 +78,8 @@ def service_get_worktime_session(user_id: int, session_log_id: int):
 
     log_id = get_worktime_log_by_id(user_id=user_id, session_log_id=session_log_id)
     if str(log_id) == "[]":
-        return {"status": False,
-                "description": "Session log not found"}
+        return Response(content=f"Session log not found",
+                        status_code=_status.HTTP_403_FORBIDDEN)
 
     else:
         return {"status": True,
@@ -98,10 +100,8 @@ def service_get_projects_worktime_sessions(user_id: int, project_id: int, projec
 
     session_logs = all_worktime_logs_of_project(user_id=user_id, project_id=project_id)
     if str(session_logs) == "[]":
-        return {"status": False,
-                "auth_token_status": "active",
-                "project_id_status": "active",
-                "description": f"no worktime sessions logs in project with id: {project_id}"}
+        return Response(content=f"no worktime sessions logs in project with id: {project_id}",
+                        status_code=_status.HTTP_403_FORBIDDEN)
     data = {"status": True,
             "auth_token_status": "active",
             "project_id_status": "active"}
@@ -128,10 +128,8 @@ def service_get_projects_sessions_time(user_id: int, project_id: int, project_da
     session_logs = all_worktime_logs_of_project_in_time(
         user_id=user_id, project_id=project_id, start=start_time, end=end_time)
     if str(session_logs) == "[]":
-        return {"status": False,
-                "auth_token_status": "active",
-                "project_id_status": "active",
-                "description": f"no worktime sessions logs in project with id: {project_id} in this time"}
+        return Response(content=f"no worktime sessions logs in project with id: {project_id} in this time",
+                        status_code=_status.HTTP_403_FORBIDDEN)
     data = {"status": True,
             "auth_token_status": "active",
             "project_id_status": "active"}
@@ -155,10 +153,8 @@ def service_get_tasks_worktime_sessions(user_id: int, project_task_data: tuple, 
     """Get all worktime session log from project id"""
     session_logs = all_worktime_logs_of_task(user_id=user_id, task_id=project_task_id)
     if str(session_logs) == "[]":
-        return {"status": False,
-                "auth_token_status": "active",
-                "task_id_status": "active",
-                "description": f"no worktime sessions logs in task with id: {project_task_id}"}
+        return Response(content=f"no worktime sessions logs in task with id: {project_task_id}",
+                        status_code=_status.HTTP_403_FORBIDDEN)
     data = {"status": True,
             "auth_token_status": "active",
             "task_id_status": "active"}
@@ -186,10 +182,8 @@ def service_get_task_sessions_time(user_id: int, project_task_data: tuple, proje
     session_logs = all_worktime_logs_of_task_in_time(
         user_id=user_id, task_id=project_task_id, start=start_time, end=end_time)
     if str(session_logs) == "[]":
-        return {"status": False,
-                "auth_token_status": "active",
-                "task_id_status": "active",
-                "description": f"no worktime sessions logs in task with id: {project_task_id} in this time"}
+        return Response(content="no worktime sessions logs in task with id: {project_task_id} in this time",
+                        status_code=_status.HTTP_403_FORBIDDEN)
     data = {"status": True,
             "auth_token_status": "active",
             "task_id_status": "active"}
@@ -214,10 +208,8 @@ def service_get_users_sessions_time(user_id: int, start_time: str, end_time: str
     """Get all user's worktime session log in time period"""
     session_logs = all_users_worktime_logs_in_time(user_id=user_id, start=start_time, end=end_time)
     if str(session_logs) == "[]":
-        return {"status": False,
-                "auth_token_status": "active",
-                "task_id_status": "active",
-                "description": f"no user's worktime sessions logs in this time"}
+        return Response(content="no user's worktime sessions logs in this time",
+                        status_code=_status.HTTP_403_FORBIDDEN)
     data = {"status": True,
             "auth_token_status": "active",
             "task_id_status": "active"}
@@ -264,7 +256,7 @@ def service_users_time_stat(user_id: int, start_time: str, end_time: str, time_d
         project_data = get_project_by_id(user_id=user_id, project_id=project)
         full_price = project_data[0][4]
         full_time = project_data[0][3]
-        money = int((full_price/full_time)*project_time)
+        money = int((full_price / full_time) * project_time)
         projects_money_in_period[project] = money
 
         all_time_money += money
@@ -273,19 +265,21 @@ def service_users_time_stat(user_id: int, start_time: str, end_time: str, time_d
     if all_time == 0:
         price_hour = 0
     else:
-        price_hour = int((all_time_money*3600)/all_time)
+        price_hour = int((all_time_money * 3600) / all_time)
     return_data = {"all_work_time": all_time,
                    "all_money_in_time_period": all_time_money,
                    "currency": "RUR",
                    "price_hour": price_hour,
                    "all_projects_ids": projects}
-
+    project_list = []
     for project in projects:
-        price_hour = int((projects_money_in_period[project]*3600)/projects_time_in_period[project])
-        return_data[project] = {'project_time_in_time_period': projects_time_in_period[project],
-                                "project_money_in_time_period": projects_money_in_period[project],
-                                "project_currency": projects_currency_in_period[project],
-                                "price_hour": price_hour}
+        price_hour = int((projects_money_in_period[project] * 3600) / projects_time_in_period[project])
+        project_list.append({'project number': project,
+                             'project_time_in_time_period': projects_time_in_period[project],
+                             "project_money_in_time_period": projects_money_in_period[project],
+                             "project_currency": projects_currency_in_period[project],
+                             "price_hour": price_hour})
+    return_data['projecs_list'] = project_list
     return return_data
 
 
@@ -295,8 +289,8 @@ def service_delete_worktime_session(user_id: int, session_log_id: int):
 
     log_id = get_worktime_log_by_id(user_id=user_id, session_log_id=session_log_id)
     if str(log_id) == "[]":
-        return {"status": False,
-                "description": "Session log not found"}
+        return Response(content='Session log not found',
+                        status_code=_status.HTTP_403_FORBIDDEN)
 
     else:
         delete_session_log(user_id=user_id, session_log_id=session_log_id)

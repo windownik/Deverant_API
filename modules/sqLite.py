@@ -6,6 +6,7 @@ import datetime
 
 def create_connect(func):
     """Decorator create/commit/close connection to database """
+
     @wraps(func)
     def _con(*args, **kwargs):
         connect = sqlite3.connect('modules/database.db', check_same_thread=False)
@@ -157,7 +158,7 @@ def get_user_auth(cursor, mail: str, password: str):
 @create_connect
 def get_user_id_by_email(cursor, email: str, password: str):
     """Get user id by email and password"""
-    cursor.execute(f'SELECT * FROM all_users WHERE "mail" = "{email}"')
+    cursor.execute(f'SELECT * FROM all_users WHERE "mail" = "{email}" AND "password_hash" = "{password}"')
     data = cursor.fetchall()
     if str(data) == "[]":
         return False
@@ -246,8 +247,12 @@ def create_task_worktime_session(user_id: int, project_id: int, task_id: int, st
     try:
         cursor.execute(f"INSERT OR IGNORE INTO timework{user_id} VALUES (?,?,?,?,?,?,?)",
                        (None, project_id, task_id, start, end, time_delta, data))
+
+        cursor.execute(f"UPDATE all_projects{user_id} SET lust_active=(?) WHERE id=(?)",
+                       (data, project_id))
         connect.commit()
         cursor.execute(f'SELECT id FROM timework{user_id} WHERE "data" = "{data}"')
+
         data = cursor.fetchall()[0][0]
         # connect.close()
         return data
@@ -268,6 +273,14 @@ def create_auth_token(cursor, user_id: int, auth_token: str, secret_hash: str, s
 def grab_all_my_projects(cursor, user_id: int):
     """Get all user's projects"""
     cursor.execute(f'SELECT * FROM all_projects{user_id}')
+    data = cursor.fetchall()
+    return data
+
+
+@create_connect
+def grab_my_projects_offset(cursor, user_id: int, offset: int = 0, limit: int = 3):
+    """Get all user's projects"""
+    cursor.execute(f'SELECT * FROM all_projects{user_id} ORDER BY id LIMIT {limit} OFFSET {offset}')
     data = cursor.fetchall()
     return data
 

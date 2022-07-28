@@ -1,6 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
-from url_functions.project_task_handlers import service_create_project, get_my_project_by_id, service_change_project,\
+from url_functions.project_task_handlers import service_create_project, get_my_project_by_id, service_change_project, \
     get_my_projects, service_create_project_task, service_task_by_id, get_all_users_project_tasks, \
     service_all_tasks_of_one_project, service_change_project_task_info, service_update_project_price, \
     service_update_project_currency, service_delete_project, service_delete_project_task, service_update_task_price
@@ -8,7 +8,7 @@ from url_functions.user_handlers import check_user_mail, login, logout, service_
     check_user_auth_token
 from url_functions.worktime_sessions_handlers import service_create_project_worktime, service_update_project_worktime, \
     service_get_worktime_session, service_delete_worktime_session, service_get_projects_worktime_sessions, \
-    service_get_projects_sessions_time,  service_get_tasks_worktime_sessions, service_get_task_sessions_time, \
+    service_get_projects_sessions_time, service_get_tasks_worktime_sessions, service_get_task_sessions_time, \
     service_get_users_sessions_time, service_users_time_stat
 from fastapi.openapi.utils import get_openapi
 from fastapi.middleware.cors import CORSMiddleware
@@ -157,11 +157,11 @@ def update_project(user_auth: str, project_id: int, name: str, description: str)
 
 
 @app.get(path='/all_projects/{user_auth}', tags=['Projects'])
-def get_all_my_projects(user_auth: str):
+def get_all_my_projects(user_auth: str, offset: int = 0, limit: int = 0):
     """
     This method returns json with all user's projects
     """
-    return get_my_projects(user_auth=user_auth)
+    return get_my_projects(user_auth=user_auth, offset=offset, limit=limit)
 
 
 @app.put(path='/project_price/{user_auth}', tags=['Projects'])

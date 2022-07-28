@@ -1,3 +1,6 @@
+from starlette.responses import Response
+import starlette.status as _status
+
 import datetime
 from functools import wraps
 
@@ -12,9 +15,8 @@ def check_token(func):
     def _con(user_auth: str, *args, **kwargs):
         user_id, user_status = get_id_by_auth(auth_token=user_auth)
         if user_status == 'need_email':
-            return {"status": False,
-                    "description": "email not confirm",
-                    "date": datetime.datetime.now()}
+            return Response(content='email not confirm',
+                            status_code=_status.HTTP_403_FORBIDDEN)
         elif str(user_id) == "[]" or user_auth == 'deleted':
             return {"status": False,
                     "description": "auth token not valid",
@@ -33,20 +35,16 @@ def check_task_id(func):
 
         user_id, user_status = get_id_by_auth(auth_token=user_auth)
         if user_status == 'need_email':
-            return {"status": False,
-                    "description": "email not confirm",
-                    "date": datetime.datetime.now()}
+            return Response(content='email not confirm',
+                            status_code=_status.HTTP_403_FORBIDDEN)
         elif str(user_id) == "[]" or user_auth == 'deleted':
-            return {"status": False,
-                    "description": "auth token not valid",
-                    "date": datetime.datetime.now()}
+            return Response(content='auth token not valid',
+                            status_code=_status.HTTP_403_FORBIDDEN)
         project_task_data = get_project_task_by_id(user_id=user_id, project_task_id=project_task_id)
 
         if str(project_task_data) == "[]":
-            return {"status": False,
-                    "auth_token_status": "active",
-                    "description": "project task not found",
-                    "date": datetime.datetime.now()}
+            return Response(content='project task not found',
+                            status_code=_status.HTTP_403_FORBIDDEN)
         result = func(user_id=user_id, project_task_data=project_task_data, project_task_id=project_task_id,
                       *args, **kwargs)
         return result
@@ -62,19 +60,15 @@ def check_project_id(func):
 
         user_id, user_status = get_id_by_auth(auth_token=user_auth)
         if user_status == 'need_email':
-            return {"status": False,
-                    "description": "email not confirm",
-                    "date": datetime.datetime.now()}
+            return Response(content='email not confirm',
+                            status_code=_status.HTTP_403_FORBIDDEN)
         elif str(user_id) == "[]" or user_auth == 'deleted':
-            return {"status": False,
-                    "description": "auth token not valid",
-                    "date": datetime.datetime.now()}
+            return Response(content='auth token not valid',
+                            status_code=_status.HTTP_403_FORBIDDEN)
         project_data = get_project_by_id(user_id=user_id, project_id=project_id)
         if str(project_data) == "[]":
-            return {"status": False,
-                    "auth_token_status": "active",
-                    "description": "project not found",
-                    "date": datetime.datetime.now()}
+            return Response(content='project not found',
+                            status_code=_status.HTTP_403_FORBIDDEN)
         result = func(user_id=user_id, project_id=project_id, project_data=project_data,
                       *args, **kwargs)
         return result
@@ -90,24 +84,18 @@ def check_project_currency_id(func):
         currency = currency.upper()
         user_id, user_status = get_id_by_auth(auth_token=user_auth)
         if user_status == 'need_email':
-            return {"status": False,
-                    "description": "email not confirm",
-                    "date": datetime.datetime.now()}
+            return Response(content='email not confirm',
+                            status_code=_status.HTTP_403_FORBIDDEN)
         elif str(user_id) == "[]" or user_auth == 'deleted':
-            return {"status": False,
-                    "description": "auth token not valid",
-                    "date": datetime.datetime.now()}
+            return Response(content='auth token not valid',
+                            status_code=_status.HTTP_403_FORBIDDEN)
         elif currency not in ("USD", "UAH", "RUR", "EUR", "BYN"):
-            return {"status": False,
-                    "auth_token_status": "active",
-                    "currency": 'That currency not supported',
-                    "date": datetime.datetime.now()}
+            return Response(content='That currency not supported',
+                            status_code=_status.HTTP_403_FORBIDDEN)
         project_task_data = get_project_by_id(user_id=user_id, project_id=project_id)
         if str(project_task_data) == "[]":
-            return {"status": False,
-                    "auth_token_status": "active",
-                    "description": "project not found",
-                    "date": datetime.datetime.now()}
+            return Response(content='project not found',
+                            status_code=_status.HTTP_403_FORBIDDEN)
         else:
             result = func(user_id=user_id, currency=currency, project_id=project_id, *args, **kwargs)
             return result
@@ -123,19 +111,16 @@ def check_worktime_log(func):
 
         user_id, user_status = get_id_by_auth(auth_token=user_auth)
         if user_status == 'need_email':
-            return {"status": False,
-                    "description": "email not confirm",
-                    "date": datetime.datetime.now()}
+            return Response(content='email not confirm',
+                            status_code=_status.HTTP_403_FORBIDDEN)
         elif str(user_id) == "[]" or user_auth == 'deleted':
-            return {"status": False,
-                    "description": "auth token not valid",
-                    "date": datetime.datetime.now()}
+            return Response(content='auth token not valid',
+                            status_code=_status.HTTP_403_FORBIDDEN)
 
         log_id = get_worktime_log_by_id(user_id=user_id, session_log_id=session_log_id)
         if str(log_id) == "[]":
-            return {"status": False,
-                    "auth_token_status": "active",
-                    "description": "Session log not found"}
+            return Response(content='Session log not found',
+                            status_code=_status.HTTP_403_FORBIDDEN)
         result = func(user_id=user_id, session_log_id=session_log_id, *args, **kwargs)
 
         return result
@@ -150,11 +135,8 @@ def check_time(func):
     def _con(start_time: str, end_time: str, *args, **kwargs):
         start_time, end_time, time_delta = data_time_validation(start=start_time, end=end_time)
         if not start_time or not end_time:
-            return {"status": False,
-                    "auth_token_status": "active",
-                    "project_task_id": "active",
-                    "description": "bad datetime format",
-                    "date": datetime.datetime.now()}
+            return Response(content='bad datetime format',
+                            status_code=_status.HTTP_403_FORBIDDEN)
         result = func(start_time=start_time, end_time=end_time, time_delta=time_delta, *args, **kwargs)
         return result
 
