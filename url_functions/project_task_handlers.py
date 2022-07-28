@@ -67,25 +67,26 @@ def get_my_projects(user_id: int, offset: int = 0, limit: int = 0):
         my_projects = grab_my_projects_offset(user_id=user_id, offset=offset, limit=limit)
     else:
         my_projects = grab_all_my_projects(user_id=user_id)
+    count_all = len(grab_all_my_projects(user_id=user_id))
     all_projects = []
     projects_list = []
     for element in my_projects:
-        project = {"status": True,
-                   'id': element[0],
-                   "project_name": element[1],
-                   "description": element[2],
-                   "work_time": element[3],
-                   "money": element[4],
-                   "currency": element[5],
-                   "create_data": element[6],
-                   "lust_activity": element[7]}
+        project = {
+            'id': element[0],
+            "project_name": element[1],
+            "description": element[2],
+            "work_time": element[3],
+            "money": element[4],
+            "currency": element[5],
+            "create_data": element[6],
+            "lust_activity": element[7]}
         all_projects.append(project)
         projects_list.append(element[0])
-    if not all_projects:
-        return {"status": True,
-                "auth_token_status": "active",
-                "description": "you haven't any projects"}
-    return all_projects
+    return {"status": True,
+            'total_count': count_all,
+            'projects_list': projects_list,
+            'projects': all_projects
+            }
 
 
 @check_project_id
