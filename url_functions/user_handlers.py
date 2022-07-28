@@ -1,9 +1,9 @@
+from starlette import status
+from starlette.responses import Response
+
 from modules.little_funcs import create_token
 from modules.send_confirm_email import send_email
-from starlette.responses import Response
-from starlette import status
 from modules.sqLite import *
-import sha512_crypt
 
 
 def check_user_mail(mail: str):

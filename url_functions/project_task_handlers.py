@@ -82,7 +82,6 @@ def get_my_projects(user_id: int, offset: int = 0, limit: int = 0):
             "lust_activity": element[7]}
         all_projects.append(project)
         projects_list.append(element[0])
-    print(3333)
     return {"status": True,
             'total_count': count_all,
             'projects_list': projects_list,
