@@ -256,6 +256,8 @@ def service_users_time_stat(user_id: int, start_time: str, end_time: str, time_d
         project_data = get_project_by_id(user_id=user_id, project_id=project)
         full_price = project_data[0][4]
         full_time = project_data[0][3]
+        if full_time == 0:
+            full_time = 1
         money = int((full_price / full_time) * project_time)
         projects_money_in_period[project] = money
 
@@ -273,7 +275,10 @@ def service_users_time_stat(user_id: int, start_time: str, end_time: str, time_d
                    "all_projects_ids": projects}
     project_list = []
     for project in projects:
-        price_hour = int((projects_money_in_period[project] * 3600) / projects_time_in_period[project])
+        if projects_time_in_period[project] == 0:
+            price_hour = 0
+        else:
+            price_hour = int((projects_money_in_period[project] * 3600) / projects_time_in_period[project])
         project_list.append({'project number': project,
                              'project_time_in_time_period': projects_time_in_period[project],
                              "project_money_in_time_period": projects_money_in_period[project],
