@@ -3,7 +3,8 @@ from fastapi import FastAPI
 from url_functions.project_task_handlers import service_create_project, get_my_project_by_id, service_change_project, \
     get_my_projects, service_create_project_task, service_task_by_id, get_all_users_project_tasks, \
     service_all_tasks_of_one_project, service_change_project_task_info, service_update_project_price, \
-    service_update_project_currency, service_delete_project, service_delete_project_task, service_update_task_price
+    service_update_project_currency, service_delete_project, service_delete_project_task, service_update_task_price, \
+    service_create_project_full
 from url_functions.user_handlers import check_user_mail, login, logout, service_create_user_account, confirm_email, \
     check_user_auth_token
 from url_functions.worktime_sessions_handlers import service_create_project_worktime, service_update_project_worktime, \
@@ -139,6 +140,18 @@ def create_project(user_auth: str, name: str, description: str):
     Description - it's long text about new project. There are you can explain about this project.\n
     """
     return service_create_project(user_auth=user_auth, name=name, description=description)
+
+
+@app.post(path='/project_price/{user_auth}', tags=['Projects'])
+def create_project_with_price(user_auth: str, name: str, description: str, price: str):
+    """
+    This method create new project in database with name, description and price.\n
+    Return new project id;
+    Name - it's short name of your new project.\n
+    Description - it's long text about new project. There are you can explain about this project.\n
+    Price - total price of new project.
+    """
+    return service_create_project_full(user_auth=user_auth, name=name, description=description, price=price)
 
 
 @app.get(path='/project/{user_auth}', tags=['Projects'])

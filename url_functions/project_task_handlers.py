@@ -5,6 +5,8 @@ from modules.sqLite import *
 from modules.decorators import check_token, check_task_id, check_project_currency_id, check_project_id
 import datetime
 
+from url_functions.worktime_sessions_handlers import update_task_worktime
+
 
 def get_user_auth_status(user_auth: str):
     """This method returns user_auth actuality status"""
@@ -37,6 +39,41 @@ def service_create_project(user_id: int, name: str, description: str):
             "date": datetime.datetime.now()}
 
 
+@check_token
+def service_create_project_full(user_id: int, name: str, description: str, price: str):
+    """
+    User create new project.\n
+    At first: check user's auth token status\n
+    Next: create line in table user's projects and table for timework sessions
+    """
+    end_time = datetime.datetime.now()
+    start_time = end_time - datetime.timedelta(minutes=1)
+    time_delta = (end_time - start_time).seconds
+    project_id = user_create_project(user_id=user_id, name=name, description=description)
+    update_project_price(user_id=user_id, price=price, project_id=project_id)
+    project_task_id = user_create_project_task(user_id=user_id, project_id=project_id, name=name,
+                                               description=description)
+    log_id = create_task_worktime_session(user_id=user_id, project_id=project_id, task_id=project_task_id,
+                                          start=str(start_time), end=str(end_time), time_delta=time_delta)
+    update_task_worktime(user_id=user_id, project_id=project_id, task_id=project_task_id)
+    # Write first log
+    write_log(user_id=user_id, log_text=f'User with id: {user_id}, create new project with name {name},'
+                                        f'new project id: {project_id}')
+    return {"status": True,
+            "auth_token_status": "active",
+            "description": "new project created",
+            "project_id": project_id,
+            "task_id": project_task_id,
+            'project_name': name,
+            'project_description': description,
+            'task_name': name,
+            'task_description': description,
+            'price': price,
+            'work_time_log': log_id,
+            'work_time_duration': time_delta,
+            "date": datetime.datetime.now()}
+
+
 @check_project_id
 def service_create_project_task(user_id: int, project_id: int, name: str, description: str, project_data: tuple):
     """
@@ -44,7 +81,6 @@ def service_create_project_task(user_id: int, project_id: int, name: str, descri
     At first: check user's auth token status\n
     Next: create line in table user's projects and table for timework sessions
     """
-    print(name, description)
     project_task_id = user_create_project_task(user_id=user_id, project_id=project_id, name=name,
                                                description=description)
     # Write log
