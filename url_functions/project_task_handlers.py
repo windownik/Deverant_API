@@ -181,29 +181,26 @@ def service_all_tasks_of_one_project(user_id: int, project_id: int, project_data
     tasks_part_price = all_project_tasks_part_price(user_id=user_id, project_id=project_id)
     all_time = sum([i[4] for i in tasks_part_price])
     project_money = get_project_by_id(user_id=user_id, project_id=project_id)[0][4]
-    tasks = {}
+    tasks = []
     for element in my_project_tasks:
         if element[6] == 'separately':
             money = element[5]
         else:
             money = int((int(project_money) / all_time) * int(element[4]))
             update_task_price(user_id=user_id, price=int(money), task_id=element[0], money_type='part')
-        tasks[element[0]] = {"status": True,
-                             'id': element[0],
-                             "main_project_id": element[1],
-                             "project_name": element[2],
-                             "description": element[3],
-                             "work_time": element[4],
-                             "money": money,
-                             "money_type": element[6],
-                             "create_data": element[7],
-                             "lust_activity": element[8]}
+        tasks.append({'task_id': element[0],
+                      "main_project_id": element[1],
+                      "project_name": element[2],
+                      "description": element[3],
+                      "work_time": element[4],
+                      "money": money,
+                      "money_type": element[6],
+                      "create_data": element[7],
+                      "lust_activity": element[8]})
 
-    if tasks == {}:
-        return {"status": False,
-                "auth_token_status": "active",
-                "description": "you haven't any project tasks"}
-    return tasks
+    return {"status": True,
+            "tasks_count": len(my_project_tasks),
+            "tasks_list": tasks}
 
 
 @check_task_id
