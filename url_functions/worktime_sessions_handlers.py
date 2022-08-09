@@ -155,21 +155,28 @@ def service_get_tasks_worktime_sessions(user_id: int, project_task_data: tuple, 
     if str(session_logs) == "[]":
         return Response(content=f"no worktime sessions logs in task with id: {project_task_id}",
                         status_code=_status.HTTP_403_FORBIDDEN)
-    data = {"status": True,
-            "auth_token_status": "active",
-            "task_id_status": "active"}
+
     time_delta = 0
+    session_logs_id = []
+    tasks = []
     for log in session_logs:
         time_delta = time_delta + int(log[5])
-        data[log[0]] = {
+        session_logs_id.append(log[0])
+        tasks.append({
             "session_log_id": log[0],
             "project_id": log[1],
             "project_task_id": log[2],
             "start_log": log[3],
             "end_log": log[4],
             "time_delta_sec": log[5],
-            "create_data": log[6]}
-    data["all_worktime_sec"] = time_delta
+            "create_data": log[6]})
+
+    data = {"status": True,
+            "auth_token_status": "active",
+            "task_id_status": "active",
+            "all_worktime_sec": time_delta,
+            "all_tasks_id": session_logs_id,
+            'all_tasks': tasks}
     return data
 
 
